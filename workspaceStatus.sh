@@ -20,8 +20,14 @@ colorGIT_SVN="1;36"
 typeGIT_SVN="\e["$colorGIT_SVN"m[git-svn]\e[m"
 
 dots="................................................"
-
-ls -1 | while read projectName
+if test -z "$*" 
+then
+	DIRS='*'
+else
+	DIRS="$*"
+fi
+echo DIRS = $DIRS
+ls -1 -d $DIRS | while read projectName
 do
 	if test -d "$projectName"
 	then
