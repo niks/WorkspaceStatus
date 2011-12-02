@@ -26,16 +26,66 @@ then
 else
 	DIRS="$*"
 fi
-echo DIRS = $DIRS
-ls -1 -d $DIRS | while read projectName
+
+function gitBranchAheadCount() {
+	branchName=$1
+	remote=$(git config branch.$branchName.remote)
+	if test -n "$remote"
+	then 
+		remoteBranch=$(git config branch.$branchName.merge | sed 's/refs\/heads\///')
+		ahead=$(git log --oneline $remote/$remoteBranch..$branchName | wc -l)
+		echo $ahead
+	else 
+		echo -1
+	fi
+}
+
+function printGitBranchStatus() {
+	branchName=$1
+	aheadCount=$2
+	branchColor=$3
+	
+	if test $aheadCount -ge 0
+	then 
+		remote=$(git config branch.$branchName.remote)
+		remoteBranch=$(git config branch.$branchName.merge | sed 's/refs\/heads\///')
+		if test $aheadCount -gt 0
+		then
+			printf "\e["$branchColor"m%-20.20s \e[1;31mis ahead of $remote/$remoteBranch by %s commits \e[m\n" "["$branchName"]"$dots $aheadCount
+		else 
+			printf "\e["$branchColor"m%-20.20s \e[0;32mis pushed completely to $remote/$remoteBranch\e[m\n" "["$branchName"]"$dots
+		fi
+	else 
+		printf "\e["$branchColor"m%-20.20s\e[m does not track a remote branch\n" "["$branchName"]"$dots
+	fi
+}
+
+function gitstatus() {
+	currentBranch=$(git name-rev --name-only HEAD)
+	aheadCount=$(gitBranchAheadCount $currentBranch)
+	
+	printGitBranchStatus $currentBranch $aheadCount $colorGIT
+	
+	git show-ref --heads | sed 's/^.* refs\/heads\///' | while read branchName
+	do
+		if test $currentBranch != $branchName
+		then
+			printf "%-49.49s" ""
+			aheadCount=$(gitBranchAheadCount $branchName)
+			printGitBranchStatus $branchName $aheadCount ""
+		fi
+	done
+}
+
+ls -1 -d $DIRS | while read projectDir
 do
-	if test -d "$projectName"
+	if test -d "$projectDir"
 	then
-		cd "$projectName"
+		cd "$projectDir"
 		projectType=""
 		localstatus=$localStatusUnknown
 		serverstatus=$serverStatusUnknown
-		info=""
+		currentBranch=""
 		if test -d ".svn"
 		then
 			projectType=$typeSVN
@@ -47,7 +97,7 @@ do
 				localstatus=$clean
 			fi
 			branch=$(svn info | grep '^URL:' | sed -r "s/.*((tags|branches)\/(.*)|(trunk))/\1/")
-			info="\e["$colorSVN"m[$branch]\e[m"
+			currentBranch="\e["$colorSVN"m[$branch]\e[m"
 		elif test -d ".git"
 		then
 			if test -d ".git/svn"
@@ -71,12 +121,19 @@ do
 				localstatus=$clean
 			fi
 			branch=$(git name-rev --name-only HEAD)
-			info="\e["$colorGIT"m[$branch]\e[m"
+			currentBranch="\e["$colorGIT"m[$branch]\e[m"
 		else
 			projectType=$typeNONE
-		fi		
-		printf "%7b %-30.30s $localstatus $serverstatus $info" "$projectType" "$projectName$dots"
-		echo ""
+		fi
+		
+		if test "$projectType" = "$typeGIT"
+		then
+			printf "%-30.30s %7b $localstatus " "$projectDir$dots" "$projectType" 
+			gitstatus $projectDir
+		else 
+			printf "%-30.30s %7b $localstatus $currentBranch $serverstatus\n" "$projectDir$dots" "$projectType" 
+		fi
+		
 		cd ..
 	fi
 done
