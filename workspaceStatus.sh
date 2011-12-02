@@ -108,7 +108,8 @@ function gitSvnStatus() {
 				printf "%-49.49s" ""
 				printGitBranchStatus "$branchName" "" "$remote" "$remoteBranch" "$aheadCount"
 			else 
-				printf "%-49.49s [unknown status: cannot determine remote name!]" ""
+				printf "%-49.49s" ""
+				printf "%-20.20s \e[1;31m%s\e[m\n" "["$localBranch"]"$dots "[unknown status: cannot determine remote name!]"
 			fi
 		fi
 	done
