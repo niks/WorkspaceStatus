@@ -99,7 +99,7 @@ function gitSvnStatus() {
 		if test $currentBranch != $branchName
 		then
 			remoteWithBranch=$(git name-rev --refs "refs/remotes/*" $currentBranch | sed 's/^.* //')
-			if test "$remoteWithBranch" = "undefined"
+			if test "$remoteWithBranch" != "undefined"
 			then
 				remote=${remoteWithBranch%/*}
 				remoteBranch=${remoteWithBranch#remotes/}
