@@ -51,9 +51,9 @@ function printGitBranchStatus() {
 	then 
 		if test $aheadCount -gt 0
 		then
-			printf "\e["$branchColor"m%-20.20s \e[1;31mis ahead of $remote/$remoteBranch by %s commits \e[m\n" "["$localBranch"]"$dots $aheadCount
+			printf "\e["$branchColor"m%-20.20s \e[1;31mis ahead of %s by %s commits \e[m\n" "["$localBranch"]"$dots "$remote/$remoteBranch" $aheadCount
 		else 
-			printf "\e["$branchColor"m%-20.20s \e[0;32mis pushed completely to $remote/$remoteBranch\e[m\n" "["$localBranch"]"$dots
+			printf "\e["$branchColor"m%-20.20s \e[0;32mis pushed completely to %s\e[m\n" "["$localBranch"]"$dots "$remote/$remoteBranch"
 		fi
 	else 
 		printf "\e["$branchColor"m%-20.20s\e[m does not track a remote branch\n" "["$localBranch"]"$dots
