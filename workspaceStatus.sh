@@ -98,7 +98,7 @@ function gitSvnStatus() {
 	do
 		if test $currentBranch != $branchName
 		then
-			remoteWithBranch=$(git name-rev --refs "refs/remotes/*" $currentBranch | sed 's/^.* //')
+			remoteWithBranch=$(git name-rev --refs "refs/remotes/*" $branchName | sed 's/^.* //')
 			if test "$remoteWithBranch" != "undefined"
 			then
 				remote=${remoteWithBranch%/*}
@@ -109,7 +109,7 @@ function gitSvnStatus() {
 				printGitBranchStatus "$branchName" "" "$remote" "$remoteBranch" "$aheadCount"
 			else 
 				printf "%-49.49s" ""
-				printf "%-20.20s \e[1;31m%s\e[m\n" "["$localBranch"]"$dots "[unknown status: cannot determine remote name!]"
+				printf "%-20.20s \e[1;31m%s\e[m\n" "["$branchName"]"$dots "[unknown status: cannot determine remote branch]"
 			fi
 		fi
 	done
