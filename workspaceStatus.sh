@@ -129,16 +129,16 @@ do
 	then
 		cd "$projectDir"
 		projectType=""
-		localstatus=$localStatusUnknown
+		workspaceStatus=$localStatusUnknown
 		if test -d ".svn"
 		then
 			projectType=$typeSVN
 			svnstatus=$(svn status --ignore-externals)
 			if test -n "$svnstatus"
 			then
-				localstatus=$dirty
+				workspaceStatus=$dirty
 			else 
-				localstatus=$clean
+				workspaceStatus=$clean
 			fi
 		elif test -d ".git"
 		then
@@ -151,15 +151,15 @@ do
 			gitstatus=$(git status --porcelain)
 			if test -n "$gitstatus"
 			then
-				localstatus=$dirty
+				workspaceStatus=$dirty
 			else 
-				localstatus=$clean
+				workspaceStatus=$clean
 			fi
 		else
 			projectType=$typeNONE
 		fi
 		
-		printf "%-30.30s %7b $localstatus " "$projectDir$dots" "$projectType" 
+		printf "%-30.30s %7b $workspaceStatus " "$projectDir$dots" "$projectType" 
 		
 		if test "$projectType" = "$typeGIT"
 		then
