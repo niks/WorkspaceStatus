@@ -119,7 +119,7 @@ function gitSvnStatus() {
 
 function svnStatus() {
 	branch=$(svn info | grep '^URL:' | sed -r "s/.*((tags|branches)\/(.*)|(trunk))/\1/")
-	printf "\e["$colorCurrentBranch"m[$branch]\e[m $serverstatus\n"
+	printf "\e["$colorCurrentBranch"m[$branch]\e[m\n"
 
 }
 
@@ -130,8 +130,6 @@ do
 		cd "$projectDir"
 		projectType=""
 		localstatus=$localStatusUnknown
-		serverstatus=$serverStatusUnknown
-		currentBranch=""
 		if test -d ".svn"
 		then
 			projectType=$typeSVN
@@ -157,8 +155,6 @@ do
 			else 
 				localstatus=$clean
 			fi
-			branch=$(git name-rev --name-only HEAD)
-			currentBranch="\e["$colorGIT"m[$branch]\e[m"
 		else
 			projectType=$typeNONE
 		fi
