@@ -71,13 +71,14 @@ function gitstatus() {
 	
 	printGitBranchStatus "$currentBranch" "$colorCurrentBranch" "$remote" "$remoteBranch" "$aheadCount"
 	
-	git show-ref --heads | sed 's/^.* refs\/heads\///' | while read branchName
+	git show-ref --heads |  sed 's/^.* //' | while read branch
 	do
+		branchName=${branch#refs/heads/}
 		if test $currentBranch != $branchName
 		then
 			remote=$(git config branch.$branchName.remote)
 			remoteBranch=$(git config branch.$branchName.merge | sed 's/refs\/heads\///')			
-			aheadCount=$(gitBranchAheadCount $branchName $remote $remoteBranch)
+			aheadCount=$(gitBranchAheadCount $branch $remote $remoteBranch)
 			
 			printf "%-49.49s" ""
 			printGitBranchStatus "$branchName" "" "$remote" "$remoteBranch" "$aheadCount"
@@ -96,16 +97,17 @@ function gitSvnStatus() {
 	
 	printGitBranchStatus "$currentBranch" "$colorGIT" "$remote" "$remoteBranch" "$aheadCount"
 	
-	git show-ref --heads | sed 's/^.* refs\/heads\///' | while read branchName
+	git show-ref --heads |  sed 's/^.* //' | while read branch
 	do
+		branchName=${branch#refs/heads/}
 		if test $currentBranch != $branchName
 		then
-			remoteWithBranch=$(git name-rev --refs "refs/remotes/*" $branchName | sed 's/^.* //')
+			remoteWithBranch=$(git name-rev --refs "refs/remotes/*" $branch | sed 's/^.* //')
 			if test "$remoteWithBranch" != "undefined"
 			then
 				remote=${remoteWithBranch%/*}
 				remoteBranch=${remoteWithBranch#remotes/}
-				aheadCount=$(gitBranchAheadCount $branchName $remote $remoteBranch)
+				aheadCount=$(gitBranchAheadCount $branch $remote $remoteBranch)
 				
 				printf "%-49.49s" ""
 				printGitBranchStatus "$branchName" "" "$remote" "$remoteBranch" "$aheadCount"
