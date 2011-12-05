@@ -170,8 +170,8 @@ do
 		elif test "$projectType" = "$typeGIT_SVN"
 		then
 			gitSvnStatus $projectDir
-		else 
-			printf "$currentBranch $serverstatus\n"
+		else
+			svnStatus $projectDir
 		fi
 		
 		cd ..
