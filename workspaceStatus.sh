@@ -14,6 +14,8 @@ colorSVN="1;35"
 colorGIT="1;36"
 colorGIT_SVN="1;36"
 
+colorCurrentBranch="1;36"
+
    typeNONE="\e["$colorNONE"m  [none] \e[m"
     typeSVN="\e["$colorSVN"m  [svn]  \e[m"
     typeGIT="\e["$colorGIT"m  [git]  \e[m"
@@ -67,7 +69,7 @@ function gitstatus() {
 
 	aheadCount=$(gitBranchAheadCount $currentBranch $remote $remoteBranch)
 	
-	printGitBranchStatus "$currentBranch" "$colorGIT" "$remote" "$remoteBranch" "$aheadCount"
+	printGitBranchStatus "$currentBranch" "$colorCurrentBranch" "$remote" "$remoteBranch" "$aheadCount"
 	
 	git show-ref --heads | sed 's/^.* refs\/heads\///' | while read branchName
 	do
@@ -116,7 +118,8 @@ function gitSvnStatus() {
 }
 
 function svnStatus() {
-	printf "$currentBranch $serverstatus\n"
+	branch=$(svn info | grep '^URL:' | sed -r "s/.*((tags|branches)\/(.*)|(trunk))/\1/")
+	printf "\e["$colorCurrentBranch"m[$branch]\e[m $serverstatus\n"
 
 }
 
@@ -139,8 +142,6 @@ do
 			else 
 				localstatus=$clean
 			fi
-			branch=$(svn info | grep '^URL:' | sed -r "s/.*((tags|branches)\/(.*)|(trunk))/\1/")
-			currentBranch="\e["$colorSVN"m[$branch]\e[m"
 		elif test -d ".git"
 		then
 			if test -d ".git/svn"
