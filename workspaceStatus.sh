@@ -15,6 +15,7 @@ colorGIT="1;36"
 colorGIT_SVN="1;36"
 
 colorCurrentBranch="1;36"
+colorUnknownGitSvnRemote="0;33"
 
    typeNONE="\e["$colorNONE"m  [none] \e[m"
     typeSVN="\e["$colorSVN"m  [svn]  \e[m"
@@ -113,7 +114,7 @@ function gitSvnStatus() {
 				printGitBranchStatus "$branchName" "" "$remote" "$remoteBranch" "$aheadCount"
 			else 
 				printf "%-49.49s" ""
-				printf "%-20.20s \e[1;31m%s\e[m\n" "["$branchName"]"$dots "[unknown status: cannot determine remote branch]"
+				printf "%-20.20s \e[$colorUnknownGitSvnRemote""m%s\e[m\n" "["$branchName"]"$dots "[unknown status: cannot determine remote branch]"
 			fi
 		fi
 	done
