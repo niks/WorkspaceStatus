@@ -169,8 +169,11 @@ do
 		elif test "$projectType" = "$typeGIT_SVN"
 		then
 			gitSvnStatus $projectDir
-		else
+		elif test "projectType" = "$typeSVN"
+		then
 			svnStatus $projectDir
+		else
+			printf "\n"
 		fi
 		
 		cd ..
