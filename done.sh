@@ -26,7 +26,7 @@ fi
 
 echo log commits done after $after and before $before
 
-find . -name ".git" | 
+find . -maxdepth 3 -name ".git" -prune | 
 while read dir
 do 
 	user=`git config user.name`
