@@ -16,6 +16,9 @@ then
 elif test "$*" = "this week"
 then 
 	after="one week ago"
+elif test "$*" = "last week"
+then 
+	after="two weeks ago"
 elif test "$*" = "this month"
 then 
 	after="one month ago"
