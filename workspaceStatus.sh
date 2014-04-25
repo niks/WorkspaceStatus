@@ -22,7 +22,7 @@ colorUnknownGitSvnRemote="0;33"
     typeGIT="\e["$colorGIT"m  [git]  \e[m"
 typeGIT_SVN="\e["$colorGIT_SVN"m[git-svn]\e[m"
 
-dots="................................................"
+padding='________________________________________'
 if test -z "$*" 
 then
 	DIRS='*'
@@ -30,59 +30,71 @@ else
 	DIRS="$*"
 fi
 
-function gitBranchAheadCount() {
-	localBranch=$1
-	remote=$2
-	remoteBranch=$3
-	if test -n "$remote"
-	then 
-		ahead=$(git log --oneline $remote/$remoteBranch..$localBranch | wc -l)
-		echo $ahead
-	else 
-		echo -1
-	fi
-}
-
 function printGitBranchStatus() {
 	localBranch=$1
 	branchColor=$2
-	remote=$3
-	remoteBranch=$4
-	aheadCount=$5
+	
+	remote=$(git config branch.$localBranch.remote)
+
+	maxNameLength=30
+	nameDisplayLength=$[${#localBranch}>$maxNameLength?$maxNameLength:${#localBranch}]
+	padlength=$[$maxNameLength - $nameDisplayLength]
+	branchDisplay=${localBranch: -$nameDisplayLength}
 	
 	if test -n "$remote"
 	then 
-		if test $aheadCount -gt 0
+
+		remoteBranchRef=$(git config branch.$localBranch.merge)
+		remoteBranch=$remote/$(echo $remoteBranchRef | sed 's/refs\/heads\///')
+		remoteTrackingRef=refs/remotes/$remoteBranch
+				
+		if git show-ref --verify -q $remoteTrackingRef
 		then
-			printf "\e["$branchColor"m%-20.20s \e[1;31mis ahead of %s by %s commits \e[m\n" "["$localBranch"]"$dots "$remote/$remoteBranch" $aheadCount
-		else 
-			printf "\e["$branchColor"m%-20.20s \e[0;32mis pushed completely to %s\e[m\n" "["$localBranch"]"$dots "$remote/$remoteBranch"
+			aheadCount=$(git log --oneline $remoteBranch..$localBranch | wc -l | tr -d ' ')
+			behindCount=$(git log --oneline $localBranch..$remoteBranch | wc -l | tr -d ' ')
+
+			
+			out="    "
+			in="    "
+			color=""
+			if test $aheadCount -eq 0 -a $behindCount -eq 0
+			then
+				color="0;32"
+			else 
+				if test $behindCount -gt 0	
+				then
+					in=$(printf "%3s↓" $behindCount)
+					color="0;36"
+					# FIXME change to orange
+				fi
+				
+				if test  $aheadCount -gt 0	
+				then
+					out=$(printf "%3s↑" $aheadCount)
+					color="0;31" # override with red at this point, even if behind set a color already
+				fi
+			fi
+			printf "\e["$branchColor"m%.*s%0.*s\e["$color"m %s %s %s\e[m\n" $maxNameLength $branchDisplay $padlength "$padding" "$in" "$out" "$remoteBranch"
+		else
+			printf "\e["$branchColor"m%.*s%0.*s\e[0;31m is configured to track a non-existing branch $remoteBranch\e[m\n" $maxNameLength $branchDisplay $padlength "$padding"
 		fi
 	else 
-		printf "\e["$branchColor"m%-20.20s\e[m does not track a remote branch\n" "["$localBranch"]"$dots
+		printf "\e["$branchColor"m%.*s%0.*s\e[m does not track a remote branch\n" $maxNameLength $branchDisplay $padlength "$padding"
 	fi
 }
 
 function gitstatus() {
 	currentBranch=$(git name-rev --name-only HEAD)
-	remote=$(git config branch.$currentBranch.remote)
-	remoteBranch=$(git config branch.$currentBranch.merge | sed 's/refs\/heads\///')
-
-	aheadCount=$(gitBranchAheadCount $currentBranch $remote $remoteBranch)
 	
-	printGitBranchStatus "$currentBranch" "$colorCurrentBranch" "$remote" "$remoteBranch" "$aheadCount"
+	printGitBranchStatus "$currentBranch" "$colorCurrentBranch"
 	
 	git show-ref --heads |  sed 's/^.* //' | while read branch
 	do
 		branchName=${branch#refs/heads/}
 		if test $currentBranch != $branchName
 		then
-			remote=$(git config branch.$branchName.remote)
-			remoteBranch=$(git config branch.$branchName.merge | sed 's/refs\/heads\///')			
-			aheadCount=$(gitBranchAheadCount $branch $remote $remoteBranch)
-			
 			printf "%-49.49s" ""
-			printGitBranchStatus "$branchName" "" "$remote" "$remoteBranch" "$aheadCount"
+			printGitBranchStatus "$branchName" ""
 		fi
 	done
 }
@@ -114,7 +126,7 @@ function gitSvnStatus() {
 				printGitBranchStatus "$branchName" "" "$remote" "$remoteBranch" "$aheadCount"
 			else 
 				printf "%-49.49s" ""
-				printf "%-20.20s \e[$colorUnknownGitSvnRemote""m%s\e[m\n" "["$branchName"]"$dots "[unknown status: cannot determine remote branch]"
+				printf "%-20.20s \e[$colorUnknownGitSvnRemote""m%s\e[m\n" "["$branchName"]$padding" "[unknown status: cannot determine remote branch]"
 			fi
 		fi
 	done
@@ -126,6 +138,7 @@ function svnStatus() {
 
 }
 
+baseDir=$(pwd)
 ls -1 -d $DIRS | while read projectDir
 do
 	if test -d "$projectDir"
@@ -162,7 +175,7 @@ do
 			projectType=$typeNONE
 		fi
 		
-		printf "%-30.30s %7b $workspaceStatus " "$projectDir$dots" "$projectType" 
+		printf "%-30.30s %7b $workspaceStatus " "$projectDir$padding" "$projectType" 
 		
 		if test "$projectType" = "$typeGIT"
 		then
@@ -177,6 +190,6 @@ do
 			printf "\n"
 		fi
 		
-		cd ..
+		cd $baseDir
 	fi
 done
