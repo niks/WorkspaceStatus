@@ -15,16 +15,17 @@ then
 	before="00:00"
 elif test "$*" = "this week"
 then 
-	after="one week ago"
+	after="last monday 00:00"
 elif test "$*" = "last week"
 then 
-	after="two weeks ago"
+	after="two monday ago 00:00"
+    before="last friday 24:00"
 elif test "$*" = "this month"
 then 
 	after="one month ago"
 else 
-	echo "Don't understand $*. Assuming today"
-	after="00:00"
+	echo "Don't understand $*. Assuming after $*"
+	after="$*"
 fi
 
 echo log commits done after $after and before $before
