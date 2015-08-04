@@ -43,11 +43,10 @@ function printGitBranchStatus() {
 	
 	if test -n "$remote"
 	then 
-
 		remoteBranchRef=$(git config branch.$localBranch.merge)
 		remoteBranch=$remote/$(echo $remoteBranchRef | sed 's/refs\/heads\///')
 		remoteTrackingRef=refs/remotes/$remoteBranch
-				
+
 		if git show-ref --verify -q $remoteTrackingRef
 		then
 			aheadCount=$(git log --oneline $remoteBranch..$localBranch | wc -l | tr -d ' ')
@@ -78,8 +77,24 @@ function printGitBranchStatus() {
 		else
 			printf "\e["$branchColor"m%.*s%0.*s\e[0;31m is configured to track a non-existing branch $remoteBranch\e[m\n" $maxNameLength $branchDisplay $padlength "$padding"
 		fi
-	else 
-		printf "\e["$branchColor"m%.*s%0.*s\e[m does not track a remote branch\n" $maxNameLength $branchDisplay $padlength "$padding"
+	else
+		printf "\e["$branchColor"m%.*s%0.*s\e[m does not track a remote branch" $maxNameLength $branchDisplay $padlength "$padding"
+		first=y
+		for remote in $(git remote)
+		do 
+			remoteTrackingRef=refs/remotes/$remote/$localBranch
+			if git show-ref --verify -q $remoteTrackingRef
+			then
+				if test "$first" = "y"
+				then 
+					printf " \e[0;31mbut a tracking branch exists for: "
+				else 
+					printf ", "
+				fi
+				printf "$remote"
+			fi
+		done
+		printf "\e[m\n"
 	fi
 }
 
