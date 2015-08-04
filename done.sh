@@ -45,6 +45,11 @@ find . \( \
 while read dir
 do 
 	user=`git config user.name`
-	echo done as $user in ${dir%.git}
-	git --git-dir=$dir log --pretty=format:"%C(yellow)%h %C(cyan)%ad %Creset%s" --date=short --after="$after" --before="$before" --author="$user" --all
+    if test `git --git-dir=$dir --no-pager log --oneline --after="$after" --before="$before" --author="$user" --all | wc -l` -gt 0
+    then
+        echo
+        echo
+        echo done as $user in ${dir%.git}
+        git --git-dir=$dir --no-pager log --pretty=format:"%C(yellow)%h %C(cyan)%cd %C(reset)%C(magenta)%ad %Creset%s" --date=short --after="$after" --before="$before" --author="$user" --all
+    fi
 done
