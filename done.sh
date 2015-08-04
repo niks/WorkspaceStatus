@@ -29,7 +29,19 @@ fi
 
 echo log commits done after $after and before $before
 
-find . -maxdepth 3 -name ".git" -prune | 
+find . \( \
+   -name src \
+-o -name bin \
+-o -name build \
+-o -name deploy \
+-o -name release \
+-o -name GeneratedStubs \
+-o -name MergedStubs \
+-o -name MergingStubs \
+-o -name Internal \
+-o -name External \
+-o -path "*/.git/*" \
+\) -prune -o \( -name .git -print \) |
 while read dir
 do 
 	user=`git config user.name`
