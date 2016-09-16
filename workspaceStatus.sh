@@ -184,8 +184,7 @@ do
 			else
 				projectType=$typeGIT
 			fi
-			gitstatus=$(git status --porcelain)
-			if test -n "$gitstatus"
+			if test -n "$(git --work-tree="$(pwd)" status --porcelain)"
 			then
 				workspaceStatus=$dirty
 			else 
