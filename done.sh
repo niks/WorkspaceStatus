@@ -46,7 +46,7 @@ find . \( \
 while read dir
 do 
 	user=`git config user.name`
-    if test `git --git-dir=$dir --no-pager log --oneline --after="$after" --before="$before" --author="$user" --all | wc -l` -gt 0
+    if test `git --git-dir="$dir" --no-pager log --oneline --after="$after" --before="$before" --author="$user" --all | wc -l` -gt 0
     then
         echo
         echo
