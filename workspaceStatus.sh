@@ -176,7 +176,7 @@ do
 			else 
 				workspaceStatus=$clean
 			fi
-		elif test -d ".git"
+		elif test -e ".git"
 		then
 			if test -d ".git/svn"
 			then
