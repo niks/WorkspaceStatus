@@ -17,6 +17,11 @@ colorGIT_SVN="1;36"
 colorCurrentBranch="1;36"
 colorUnknownGitSvnRemote="0;33"
 
+colorUptodate="0;32"
+colorIncommingChange="0;36"
+colorOutgoingChange="0;31"
+colorUntrackedChange="1;31"
+
    typeNONE="\e["$colorNONE"m  [none] \e[m"
     typeSVN="\e["$colorSVN"m  [svn]  \e[m"
     typeGIT="\e["$colorGIT"m  [git]  \e[m"
@@ -58,19 +63,19 @@ function printGitBranchStatus() {
 			color=""
 			if test $aheadCount -eq 0 -a $behindCount -eq 0
 			then
-				color="0;32"
+				color=$colorUptodate
 			else 
 				if test $behindCount -gt 0	
 				then
 					in=$(printf "%3s↓" $behindCount)
-					color="0;36"
+					color=$colorIncommingChange
 					# FIXME change to orange
 				fi
 				
 				if test  $aheadCount -gt 0	
 				then
 					out=$(printf "%3s↑" $aheadCount)
-					color="0;31" # override with red at this point, even if behind set a color already
+					color=$colorOutgoingChange # override with red at this point, even if behind set a color already
 				fi
 			fi
 			printf "\e["$branchColor"m%.*s%0.*s\e["$color"m %s %s %s\e[m\n" $maxNameLength $branchDisplay $padlength "$padding" "$in" "$out" "$remoteBranch"
@@ -78,7 +83,7 @@ function printGitBranchStatus() {
 			printf "\e["$branchColor"m%.*s%0.*s\e[0;31m is configured to track a non-existing branch $remoteBranch\e[m\n" $maxNameLength $branchDisplay $padlength "$padding"
 		fi
 	else
-		printf "\e["$branchColor"m%.*s%0.*s\e[m does not track a remote branch" $maxNameLength $branchDisplay $padlength "$padding"
+		printf "\e["$branchColor"m%.*s%0.*s\e["$colorUntrackedChange"m does not track a remote branch" $maxNameLength $branchDisplay $padlength "$padding"
 		first=y
 		for remote in $(git remote)
 		do 
